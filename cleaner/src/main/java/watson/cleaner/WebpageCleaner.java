@@ -2,6 +2,7 @@ package watson.cleaner;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -14,6 +15,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.safety.Whitelist;
+import org.jsoup.select.Elements;
 
 /**
  * Parser - Loops through a directory searching for 
@@ -21,7 +23,7 @@ import org.jsoup.safety.Whitelist;
  * files to just simple HTML
  * @author Phil Lopez - pgl5711@rit.edu
  */
-public class Parser 
+public class WebpageCleaner 
 {
 	public static String origLoc;
 	public static String outLoc;
@@ -36,12 +38,13 @@ public class Parser
     	
     	File dir = new File(origLoc);
 
-    	Parser p = new Parser();
+    	WebpageCleaner p = new WebpageCleaner();
+    	// Load the generic navbar for the CS RIT website
     	long s = new Date().getTime();
     	p.parseFilesInDir(dir);
     	long e = new Date().getTime();
     	
-    	System.out.println("Time taken: " + (e-s));
+    	System.out.println("Time taken: " + ((e-s)/1000) + " seconds");
     	System.out.println("Found: " + numFiles);
     	System.out.println("Valid HTML: " + validHTML);
     }
@@ -77,8 +80,11 @@ public class Parser
 				Document doc = Jsoup.parse(f, "UTF-8");
 				// Get the content of the body tag
 				for(Element e : doc.getElementsByTag("body")){
+					removeNavbar(e);
 					// Clean the HTML
-					String cleanHTML = Jsoup.clean(e.html(), Whitelist.basic());
+					String cleanHTML = Jsoup.clean(e.html(), Whitelist.relaxed());
+					
+					// Filter out the navbar
 					File newFile = new File(getBasicFileName(f));
 					PrintWriter pw = new PrintWriter(newFile);
 					pw.write(cleanHTML);
@@ -91,6 +97,18 @@ public class Parser
 			System.out.println("JSOUP Err");
 			e.printStackTrace();
 		}
+    }
+    
+    
+    public void removeNavbar(Element doc){
+    	Elements els = doc.getElementsByTag("ul");
+    	if(els.size() > 0){
+    		els.remove();
+    	}
+    	Elements imgs = doc.getElementsByTag("img");
+    	if(imgs.size() > 0){
+    		imgs.remove();
+    	}
     }
        
     /**
@@ -121,6 +139,11 @@ public class Parser
     	newFile.mkdir();
     }
     
+    /**
+     * Checks if the given file type should be ignored
+     * @param f
+     * @return
+     */
     public boolean ignoreFile(File f){
     	String[] fn = f.getName().split("\\.");
     	if(fn.length > 1){
@@ -157,5 +180,26 @@ public class Parser
 		}
     	return false;
     	
+    }
+    
+    /**
+     * Loads the contents of the given file into a string
+     * @param f
+     * @return
+     */
+    public String loadFileString(File f){
+    	try {
+    		String result = "";
+			BufferedReader reader = new BufferedReader(new FileReader(f));
+			String line;
+			while((line = reader.readLine()) != null){
+				result += line + "\n";
+			}
+			reader.close();
+			return result;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return "";
+		}
     }
 }
