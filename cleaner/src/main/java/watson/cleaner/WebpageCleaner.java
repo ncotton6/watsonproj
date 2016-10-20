@@ -2,7 +2,6 @@ package watson.cleaner;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -30,7 +29,7 @@ public class WebpageCleaner
 	public static int numFiles = 0;
 	public static int validHTML = 0;
 	public static List<String> ignoreList =	new ArrayList<String>(
-			Arrays.asList(new String[]{"pdf","jpg","png","gif"}));
+			Arrays.asList(new String[]{"pdf","jpg","png","gif","pptx","docx","css","jquery"}));
 	
     public static void main( String[] args ){    	
     	origLoc = args[0];

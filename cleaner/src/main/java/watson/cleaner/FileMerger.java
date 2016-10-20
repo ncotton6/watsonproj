@@ -25,6 +25,9 @@ public class FileMerger {
 			BufferedReader reader = new BufferedReader(new FileReader(f));
 			String line;
 			while((line = reader.readLine()) != null){
+				if(line.contains("jquery")){
+					System.out.println(f.getName());
+				}
 				out.println(line);
 			}
 			reader.close();
@@ -32,5 +35,4 @@ public class FileMerger {
 		out.flush();
 		out.close();
 	}
-	
 }
